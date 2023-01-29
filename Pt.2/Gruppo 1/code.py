@@ -228,7 +228,7 @@ def sgd(m, x_train, y_train, lr=0.0001, epochs=1000):
                 beta_dict[j] = beta_approx
                 j += 1
 
-        # Calculate the loss using mean squared error (MSE)
+        # Calculate the loss using mean squared error (MSE)(tra la y vera e quella predetta calcolata dal prodotto della x e dei beta)
         loss = np.mean((y_train - np.dot(x_train, beta_approx))**2)
 
         loss_history.append(loss)
