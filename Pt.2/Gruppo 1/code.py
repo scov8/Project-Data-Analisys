@@ -147,7 +147,7 @@ ax2.set_ylabel('Cumulative variance explained', fontsize=14)  # y-axis label
 ax2 = sns.lineplot(x=idx-1, y='cumulative',
                    data=df_explained_variance_scale, color='k')
 
-# Perform dimensionality reduction using PCA with n_components=16
+# Perform dimensionality reduction using PCA with n_components=14
 m = 14
 pca_reduced = PCA(n_components=m)
 pca_reduced.fit(X_train_scale)
