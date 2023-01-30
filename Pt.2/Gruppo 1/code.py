@@ -72,7 +72,7 @@ df = pd.DataFrame.from_dict({'X1': X_train_scale[:, 0], 'X2': X_train_scale[:, 1
                              'X19': X_train_scale[:, 18], 'X20': X_train_scale[:, 19]})
 
 # Plot the heatmap of the correlation matrix
-plt.figure("Correlation matrix ")
+plt.figure("Correlation matrix on train data scaled")
 sns.heatmap(df.corr())
 
 ##########################################################
@@ -113,25 +113,26 @@ sns.heatmap(dft.corr())
 '''
     Summary of this block:
     This code is creating a plot of the proportion of variance explained by each principal component
-    and the cumulative variance explained by all principal components respectively. The plot is showing that 16 principal
-    components allow to preserve more than 90% of the total data set variance. Therefore, the number of components is set
-    to 16 and PCA is applied again to reduce the number of features in the dataset. The original shape and transformed shape
+    and the cumulative variance explained by all principal components respectively. The plot is showing that 14 principal
+    components allow to preserve around 90% of the total data set variance. Therefore, the number of components is set
+    to 14 and PCA is applied again to reduce the number of features in the dataset. The original shape and transformed shape
     of the data are also printed to check the dimensionality reduction.
 '''
 # Create an array with index values from 1 to shape of X
 idx = np.arange(X_train_scale.shape[1])+1
 
 # Calculate the proportion of variance explained by each PC and the cumulative variance explained
-pca_scale = PCA()
-pca_scale.fit(X_train_scale)
 df_explained_variance_scale = pd.DataFrame([pca_scale.explained_variance_ratio_,
                                             np.cumsum(pca_scale.explained_variance_ratio_)],
                                            index=[
                                                'Proportion of variance explained', 'cumulative'],
                                            columns=idx).T
 
+# print(df_explained_variance_scale)
+
 # Plot the proportion of variance explained and cumulative variance explained
-fig, ax1 = plt.subplots()
+fig, ax1 = plt.subplots(
+    num='Proportion of variance explained by each principal component')
 ax1.set_xlabel('Principal component', fontsize=14)  # x-axis label
 ax1.set_ylabel('Proportion of variance explained', fontsize=14)  # y-axis label
 
@@ -147,7 +148,7 @@ ax2 = sns.lineplot(x=idx-1, y='cumulative',
                    data=df_explained_variance_scale, color='k')
 
 # Perform dimensionality reduction using PCA with n_components=16
-m = 16
+m = 14
 pca_reduced = PCA(n_components=m)
 pca_reduced.fit(X_train_scale)
 X_pca_reduced = pca_reduced.transform(X_train_scale)
@@ -176,13 +177,13 @@ print("transformed shape:", X_pca_reduced.shape)
 colors = ['red' if label == 1 else 'blue' for label in y_train]
 
 
-plt.figure("AFTER PCA")  # Create a figure labeled "AFTER PCA"
+plt.figure("Data visualization after PCA")
 # Plot the reduced data with PCA in 2D space
 plt.scatter(X_pca_reduced[:, 0], X_pca_reduced[:, 1], c=colors)
 plt.xlabel("PC1", fontsize=14)  # Label x-axis as PC1
 plt.ylabel("PC2", fontsize=14)  # Label y-axis as PC2
 
-plt.figure("BEFORE PCA")  # Create a figure labeled "BEFORE PCA"
+plt.figure("Data visualization before PCA")
 # Plot the data before PCA in 2D space
 plt.scatter(X_train_scale[:, 0], X_pca_scale[:, 1], c=colors)
 plt.xlabel("PC1", fontsize=14)  # Label x-axis as PC1
@@ -236,13 +237,15 @@ def sgd(m, x_train, y_train, lr=0.0001, epochs=1000):
     return beta_dict, loss_history
 
 
-B_stimato, loss = sgd(m, X_pca_reduced, y_train, lr=0.00001, epochs=100)
+lr = 0.00001
+epochs = 100
+B_stimato, loss = sgd(m, X_pca_reduced, y_train, lr=lr, epochs=epochs)
 
-plt.figure("Gradient descent 0.00001")
+plt.figure("Gradient descent, lr=" + str(lr) + ", epochs=" + str(epochs))
 plt.plot(loss)
 plt.xlabel('Epoch')
 plt.ylabel('Loss')
-plt.title('Loss history 0.00001')
+plt.title("Loss history, lr=" + str(lr) + ", epochs=" + str(epochs))
 
 ##########################################################
 ###################### CLASSIFIER ########################
