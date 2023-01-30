@@ -154,6 +154,7 @@ plot(cv.out)
 bestlam=cv.out$lambda.min; print(bestlam);print(log(bestlam))
 print(cv.out$lambda.1se)
 print(log(cv.out$lambda.1se))
+
 lasso.pred=predict(lasso.mod,s=bestlam ,newx=x_test)
 mse_lasso <- mean((lasso.pred-y_test)^2); mse_lasso
 
@@ -230,3 +231,24 @@ top_n <- which(coeff_elasticNet >= sort(coeff_elasticNet, decreasing = TRUE)[n])
 # Finally, we took the vector with the best predictors estimate, we diveded by 100 and and we make the conversation in ASCII.
 predictors_elasticNet <- round(coeff_elasticNet[top_n]/100, digits = 0)
 intToUtf8(predictors_elasticNet)
+
+#### Stepwise regression ####
+regfit.bwd=regsubsets(Salary~.,data=Hitters[train,], nvmax =nmax, method ="backward")
+val.errors=rep(NA,nmax)
+for(i in 1:nmax){
+  pred = predict(regfit.bwd,Hitters[test,],id=i)
+  val.errors[i] = mean((Hitters$Salary[test]-pred)^2)
+}
+val.errors
+cat("\nBackward stepwise regression best model with", which.min(val.errors),"regressors.\n")
+mse_bwd <- min(val.errors); mse_bwd
+#
+regfit.hbd=regsubsets(Salary~.,data=Hitters[train,], nvmax =nmax, method ="seqrep")
+val.errors=rep(NA,nmax)
+for(i in 1:nmax){
+  pred = predict(regfit.hbd,Hitters[test,],id=i)
+  val.errors[i] = mean((Hitters$Salary[test]-pred)^2)
+}
+val.errors
+cat("\nHybrid stepwise regression best model with", which.min(val.errors),"regressors.\n")
+mse_hbd <- min(val.errors); mse_hbd

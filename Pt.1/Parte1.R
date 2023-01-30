@@ -25,9 +25,14 @@
 ####################################################
 
 library(glmnet)
+library(plotmo)
 
 # Carichiamo il dataset
 data = read.csv("RegressionDataset_DA_group1.csv", header=T, na.strings ="?")
+
+head(data)
+# unique(unlist (lapply (Auto, function (x) which (is.na (x))))) #To find all the rows in a data frame with at least one NA
+data=na.omit(data)
 
 # Creo i due set
 set.seed(1985) # Utilizziamo un seed fissato per la riprodurre l'esperimento
@@ -43,9 +48,11 @@ y = data$Y # Salvo in y i valori della colonna Y
 
 train=sample(1:nrow(x), 0.8*nrow(x)) # another typical approach to sample
 test=(-train)
+y.test=y[test]
 
 #parameters
-grid=10^seq(10,-1,length=100)
+grid=10^seq(10,-2,length=100)
+lambda_values <- seq(from = 0.0001, to = 10, by = 0.001)
 set.seed (1985)
 
 ####################################################
@@ -69,13 +76,31 @@ bestlam=cv.out$lambda.min; print(bestlam);print(log(bestlam))
 print(cv.out$lambda.1se)
 print(log(cv.out$lambda.1se))
 
-# Effettuiamo la predizione utilizzando Ridge col migliore lambda
-ridge.pred = predict(ridge.mod, s=bestlam, newx=x[test,])
-mse_ridge <- mean((ridge.pred-y[test])^2); mse_ridge
+
+ridge.pred = predict(ridge.mod, s=10, newx=x[test,])
+min <- mean((ridge.pred-y.test)^2); mse_ridge
+lambda_def=10
+i=0
+i
+lambda_def
+min
+for (i in 1:length(lambda_values)) {
+  # Effettuiamo la predizione utilizzando Ridge col migliore lambda
+  ridge.pred = predict(ridge.mod, s=lambda_values[i], newx=x[test,])
+  mse_ridge <- mean((ridge.pred-y.test)^2); mse_ridge
+  if(mse_ridge<=min){
+    min=mse_ridge
+    lambda_def=lambda_values[i]
+  }
+}
+i
+lambda_def
+min
+
 
 # Effettuiamo la predizione utilizzando Ridge con lambda=0
 ridge.pred=predict(ridge.mod,s=0,newx=x[test,],exact=T,x=x[train,],y=y[train])
-mse_lm <- mean((ridge.pred-y[test])^2); mse_lm
+mse_lm <- mean((ridge.pred-y.test)^2); mse_lm
 
 # This represents a further improvement over the test MSE when lambda=4.
 # Finally refit our ridge regression model on the full data set with the best lambda
@@ -87,7 +112,7 @@ ridge.coef = predict(out,type="coefficients",s=0)[1:51,]
 dev.new()
 plot(out,label = T, xvar = "lambda")
 #install.packages("plotmo")
-library(plotmo)
+
 dev.new()
 plot_glmnet(out)
 
@@ -115,7 +140,7 @@ plot(lasso.mod,label = T, xvar = "lambda")
 dev.new(); plot_glmnet(lasso.mod, xvar = "lambda")
 
 # perform cross-validation
-cv.out=cv.glmnet(x[train,],y[train], alpha=1, nfolds=10)
+cv.out=cv.glmnet(x[train,],y[train], alpha=1)
 dev.new()
 plot(cv.out)
 bestlam=cv.out$lambda.min; print(bestlam);print(log(bestlam))
@@ -129,11 +154,11 @@ fit = cv.glmnet(x[train,], y[train], alpha = 1)
 plot(fit)
 
 lasso.pred=predict(lasso.mod,s=bestlam ,newx=x[test,])
-mse_lasso <- mean((lasso.pred-y[test])^2); mse_lasso
+mse_lasso <- mean((lasso.pred-y.test)^2); mse_lasso
 
 # wrt lm
 lasso.pred=predict(lasso.mod,s=0,newx=x[test,],exact=T,x=x[train,],y=y[train])
-mse_lm <- mean((lasso.pred-y[test])^2); mse_lm
+mse_lm <- mean((lasso.pred-y.test)^2); mse_lm
 
 # However, the lasso has a substantial advantage:
 # some of the 19 coefficient estimates are exactly zero (12 on the text).
@@ -173,7 +198,7 @@ bestlam_enet=cv.out$lambda.min; print(bestlam_enet);print(log(bestlam_enet))
 print(cv.out$lambda.1se)
 print(log(cv.out$lambda.1se))
 enet.pred=predict(enet.mod,s=bestlam_enet ,newx=x[test,])
-mse_enet <- mean((enet.pred-y[test])^2)
+mse_enet <- mean((enet.pred-y.test)^2)
 print(mse_enet)
 #}
 elasticNet.coeff =predict(enet.mod,type="coefficients",s=bestlam_enet)[1:51,]
