@@ -41,11 +41,6 @@ set.seed(1985) # Utilizziamo un seed fissato per la riprodurre l'esperimento
 x = model.matrix(Y~., data)[,-1] # Salvo in x tutti i valori tranne quelli di Y
 y = data$Y # Salvo in y i valori della colonna Y
 
-#library(ISLR)
-#Hitters=na.omit(Hitters)
-#x = model.matrix(Salary~., Hitters)[,-1] # without 1's
-#y = Hitters$Salary
-
 train=sample(1:nrow(x), 0.8*nrow(x)) # another typical approach to sample
 test=(-train)
 y.test=y[test]
@@ -77,6 +72,7 @@ print(cv.out$lambda.1se)
 print(log(cv.out$lambda.1se))
 
 
+# da eliminare
 ridge.pred = predict(ridge.mod, s=10, newx=x[test,])
 min <- mean((ridge.pred-y.test)^2); mse_ridge
 lambda_def=10
@@ -96,7 +92,7 @@ for (i in 1:length(lambda_values)) {
 i
 lambda_def
 min
-
+# end eliminre
 
 # Effettuiamo la predizione utilizzando Ridge con lambda=0
 ridge.pred=predict(ridge.mod,s=0,newx=x[test,],exact=T,x=x[train,],y=y[train])
