@@ -1,7 +1,6 @@
 ####################################################
 ####################### Setup ######################
 ####################################################
-
 library(glmnet)   # Load the "glmnet" package
 library(plotmo)   # Load the "plotmo" package
 library(corrplot) # Load the "corrplot" package
@@ -34,7 +33,6 @@ p <- ncol(x[train, ])    # Number of regressors
 ####################################################
 
 ############### Correlation Matrix #################
-
 dev.new()
 corData <- round(cor(x), digits = 2) # Calculate the correlation matrix of x and round the values to 2 decimal places
 # Uncomment the next line to save the plot as a PDF file
@@ -52,13 +50,11 @@ lm.coeff <- coef(lm.mod) # Get the coefficients of the model
 lm.mse <- mean((lm.predict - y[test])^2) # Calculate the mean squared error between the predicted values and the actual values in the test data
 lm.mse # Display the mean squared error
 
-
 # vif(lm.mod) # verifica la collinearità dei dati #CANCELLARE?????????
 
 ####################################################
 ###################### BSS #########################
 ####################################################
-
 # The following code performs BSS, which is computationally inefficient, however, since it both has a p
 # approximately greater than 30 
 # full.regfit <- regsubsets(Y ~ ., nvmax = variables_selected, data = data[train, ], really.big = T)
@@ -132,73 +128,15 @@ min <- which.min(val.errors) # Index of the minimum MSE value
 hyb.mse <- val.errors[min] # Stores the minimum MSE value in 'hyb.mse'
 hyb.coef <- coef(hyb.regfit, which.min(val.errors)) # Extracts the coefficients for the best model obtained from hybrid selection
 
-
 ################### Print Results ##################
-
 bwd.predictors <- round(bwd.coef / 100, digits = 0) # Round the values in bwd.coef and divide by 100, with 0 decimal places
 intToUtf8(bwd.predictors) # Convert the values in bwd.predictors to UTF-8 encoded integers
 
 fwd.predictors <- round(fwd.coef / 100, digits = 0) # Round the values in fwd.coef and divide by 100, with 0 decimal places
 intToUtf8(fwd.predictors) # Convert the values in fwd.predictors to UTF-8 encoded integers
 
-
 hyb.predictors <- round(hyb.coef / 100, digits = 0) # Round the values in hyb.coef and divide by 100, with 0 decimal places
 intToUtf8(hyb.predictors) # Convert the values in hyb.predictors to UTF-8 encoded integers
-
-######################## Plot ########################
-dev.new()
-# pdf(file="backward_cp_v20.pdf", width=20, height=10)
-plot(bwd.regfit, scale = "Cp")
-title("Backward selection with Cp")
-# dev.off()
-
-dev.new()
-# pdf(file="forward_cp_v20.pdf", width=20, height=10)
-plot(fwd.regfit, scale = "Cp")
-title("Forward selection with Cp")
-# dev.off()
-
-dev.new()
-# pdf(file="hybrid_cp_v20.pdf", width=20, height=10)
-plot(hyb.regfit, scale = "Cp")
-title("Hybrid selection with Cp")
-# dev.off()
-
-dev.new()
-# pdf(file="backward_bic_v20.pdf", width=20, height=10)
-plot(bwd.regfit, scale = "bic")
-title("Backward selection with bic")
-# dev.off()
-
-dev.new()
-# pdf(file="forward_bic_v20.pdf", width=20, height=10)
-plot(fwd.regfit, scale = "bic")
-title("Forward selection with bic")
-# dev.off()
-
-dev.new()
-# pdf(file="hybrid_bic_v20.pdf", width=20, height=10)
-plot(hyb.regfit, scale = "bic")
-title("Hybrid selection with bic")
-# dev.off()
-
-dev.new()
-# pdf(file="backward_adjr_v20.pdf", width=20, height=10)
-plot(bwd.regfit, scale = "adjr2")
-title("Backward selection with adjr2")
-# dev.off()
-
-dev.new()
-# pdf(file="forward_adjr_v20.pdf", width=20, height=10)
-plot(fwd.regfit, scale = "adjr2")
-title("Forward selection with adjr2")
-# dev.off()
-
-dev.new()
-# pdf(file="hybrid_adjr_v20.pdf", width=20, height=10)
-plot(hyb.regfit, scale = "adjr2")
-title("Hybrid selection with adjr2")
-# dev.off()
 
 ####################################################
 ###################### LASSO #######################
@@ -220,7 +158,9 @@ cv.out <- cv.glmnet(x[train, ], y[train], alpha = 1, lambda = grid)
 dev.new()
 plot(cv.out) # Plot the cross-validation results
 
-bestlam <- cv.out$lambda.1se # Determine the best lambda value based on the cross-validation results
+bestlam <- cv.out$lambda.1se # Determine the best lambda value based on the cross-validation results, we choose the 1se to select
+                             # the most parsimonious model with low error 
+# bestlam <- cv.out$lambda.min # If you want the minimum only based on MSE
 
 lasso.pred <- predict(lasso.mod, s = bestlam, newx = x[test, ]) # Use the best lambda value to make predictions on the test data
 lasso.mse <- mean((lasso.pred - y[test])^2) # Calculate the mean squared error of the predictions on the test data
@@ -235,17 +175,14 @@ cat("Number of coefficients equal to 0:", sum(lasso.coef == 0), "\n") # Print th
 dev.new()
 plot_glmnet(lasso.out, xvar = "lambda") # Plot the lasso model fit to the entire data set as a function of log lambda using plot_glmnet() function
 
-
 ################### Print Results ##################
 # Round the coefficient values to the nearest 100 and convert the result to UTF-8
 lasso.predictors <- round(lasso.coef / 100, digits = 0)
 intToUtf8(lasso.predictors)
 
-
 ####################################################
 ###################### Ridge #######################
 ####################################################
-
 grid <- 10^seq(5, -2, length = 1000) # Define a sequence of 1000 numbers logarithmically spaced between 10^5 and 10^-2
 
 # Use the argument alpha = 0 to perform ridge
@@ -274,16 +211,13 @@ dev.new()
 plot_glmnet(ridge.out, xvar = "lambda") # Plot the ridge regression model for the entire data set
 
 ################### Print Results ##################
-
 # Round the coefficients and convert to utf-8 format
 ridge.predictors <- round(ridge.coef / 100, digits = 0)
 intToUtf8(ridge.predictors)
 
-
 ####################################################
 ################### Elastic Net ####################
 ####################################################
-
 enet.mod <- glmnet(x[train, ], y[train], alpha = 0.1, lambda = grid) # Fit the Elastic Net Model with an alpha value of 0.1
 enet.pred <- predict(enet.mod, s = 0.1, newx = x[test, ]) # Predict using the fitted model and a lambda value of 0.1
 min <- mean((enet.pred - y.test)^2) # Calculate the mean squared error
@@ -327,7 +261,6 @@ enet.pred <- predict(enet.mod, s = enet.bestlam, newx = x[test, ]) # Predict usi
 enet.mse <- mean((enet.pred - y.test)^2) # Calculate the mean squared error
 
 enet.coeff <- predict(enet.mod, type = "coefficients", s = enet.bestlam)[1:p+1, ] # Get the coefficients for the fitted model with the best lambda value
-
 
 ################### Print Results ##################
 # Finally, we took the vector with the best predictors estimate, we diveded by 100 and and we make the conversation in ASCII.
