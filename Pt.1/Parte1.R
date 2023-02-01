@@ -51,6 +51,7 @@ y.test <- y[test]
 
 # parameters
 n <- nrow(data[train, ])
+p <- ncol(x[train, ])
 set.seed(1985)
 
 
@@ -58,11 +59,10 @@ set.seed(1985)
 ################### Studio dati ####################
 ####################################################
 
-############# MATRICE DI CORRELAZIONE #############
+############# MATRICE DI CORRELAZIONE ##############
 dev.new()
 corData <- round(cor(x), digits = 2)
 corPlot(corData, cex = 0.22, show.legend = TRUE, main = "Correlation plot")
-
 
 ####################################################
 ########## REGRESSIONE LINEARE MULTIPLA ############
@@ -89,19 +89,67 @@ vif(lm.mod) # verifica la collinearità dei dati
 ################### Stepwise #######################
 ####################################################
 
-variables_selected <- 20
 ################# Forward selection ################
-fwd.regfit <- regsubsets(Y ~ ., data = data[train, ], nvmax = variables_selected, method = "forward")
+fwd.regfit <- regsubsets(Y ~ ., data = data[train, ], nvmax = p, method = "forward")
 summary(fwd.regfit)
 
 ################# Backward selection ################
 # per applicare il backword dobbiamo avere n>p
-bwd.regfit <- regsubsets(Y ~ ., data = data[train, ], nvmax = variables_selected, method = "backward")
+bwd.regfit <- regsubsets(Y ~ ., data = data[train, ], nvmax = p, method = "backward")
 summary(bwd.regfit)
 
 ################## Hybrid selection ##################
-hyb.regfit <- regsubsets(Y ~ ., data = data[train, ], nvmax = variables_selected, method = "seqrep")
+hyb.regfit <- regsubsets(Y ~ ., data = data[train, ], nvmax = p, method = "seqrep")
 summary(hyb.regfit)
+
+################### Test ##################
+test.mat <- model.matrix(Y ~ ., data = data[test, ])
+
+val.errors <- rep(NA, p)
+for (i in 1:p) {
+  coefi <- coef(bwd.regfit, id = i)
+  pred <- test.mat[, names(coefi)] %*% coefi
+  val.errors[i] <- mean((y[test] - pred)^2)
+}
+
+# The best model is the one that contains which.min(val.errors) (ten in the book) variables.
+min <- which.min(val.errors)
+bwd.mse <- val.errors[min]
+bwd.coef <- coef(bwd.regfit, min) # This is based on training data
+
+val.errors <- rep(NA, p)
+for (i in 1:p) {
+  coefi <- coef(fwd.regfit, id = i)
+  pred <- test.mat[, names(coefi)] %*% coefi
+  val.errors[i] <- mean((y[test] - pred)^2)
+}
+
+# The best model is the one that contains which.min(val.errors) (ten in the book) variables.
+min <- which.min(val.errors)
+fwd.mse <- val.errors[min]
+fwd.coef <- coef(fwd.regfit, which.min(val.errors)) # This is based on training data
+
+val.errors <- rep(NA, p)
+for (i in 1:p) {
+  coefi <- coef(hyb.regfit, id = i)
+  pred <- test.mat[, names(coefi)] %*% coefi
+  val.errors[i] <- mean((y[test] - pred)^2)
+}
+
+# The best model is the one that contains which.min(val.errors) (ten in the book) variables.
+min <- which.min(val.errors)
+hyb.mse <- val.errors[min]
+hyb.coef <- coef(hyb.regfit, which.min(val.errors)) # This is based on training data
+
+################### Print Results ##################
+bwd.predictors <- round(bwd.coef / 100, digits = 0)
+intToUtf8(bwd.predictors)
+
+fwd.predictors <- round(fwd.coef / 100, digits = 0)
+intToUtf8(fwd.predictors)
+
+hyb.predictors <- round(hyb.coef / 100, digits = 0)
+intToUtf8(hyb.predictors)
 
 ######################## Plot ########################
 dev.new()
@@ -158,26 +206,6 @@ plot(hyb.regfit, scale = "adjr2")
 title("Hybrid selection with adjr2")
 # dev.off()
 
-############### Coefficients extraction ###############
-fwd.coef <- coef(fwd.regfit, 20)
-fwd.coef
-bwd.coef <- coef(bwd.regfit, 17)
-bwd.coef
-hyb.coef <- coef(hyb.regfit, 17)
-hyb.coef
-
-
-################### Print Results ##################
-
-bwd.predictors < -round(bwd.coef / 100, digits = 0)
-intToUtf8(bwd.predictors)
-
-fwd.predictors < -round(fwd.coef / 100, digits = 0)
-intToUtf8(fwd.predictors)
-
-hyb.predictors < -round(hyb.coef / 100, digits = 0)
-intToUtf8(hyb.predictors)
-
 ####################################################
 ###################### LASSO #######################
 ####################################################
@@ -199,13 +227,13 @@ plot(cv.out)
 bestlam <- cv.out$lambda.1se
 
 lasso.pred <- predict(lasso.mod, s = bestlam, newx = x[test, ])
-mse_lasso <- mean((lasso.pred - y[test])^2)
-mse_lasso
+lasso.mse <- mean((lasso.pred - y[test])^2)
+lasso.mse
 
 # However, the lasso has a substantial advantage:
 # some of the 19 coefficient estimates are exactly zero (12 on the text).
 lasso.out <- glmnet(x, y, alpha = 1, lambda = grid)
-lasso.coef <- predict(lasso.out, type = "coefficients", s = bestlam)[1:51, ]
+lasso.coef <- predict(lasso.out, type = "coefficients", s = bestlam)[1:p + 1, ]
 lasso.coef
 lasso.coef[lasso.coef != 0]
 cat("Number of coefficients equal to 0:", sum(lasso.coef == 0), "\n")
@@ -217,7 +245,6 @@ plot_glmnet(lasso.out, xvar = "lambda")
 
 
 ################### Print Results ##################
-
 lasso.predictors <- round(lasso.coef / 100, digits = 0)
 intToUtf8(lasso.predictors)
 
@@ -225,6 +252,7 @@ intToUtf8(lasso.predictors)
 ####################################################
 ###################### Ridge #######################
 ####################################################
+# andando a calcolare il lambda sarà sempre vicino allo 0, quindi diventa OLS cioè un modello lineare
 grid <- 10^seq(5, -2, length = 1000)
 
 ridge.mod <- glmnet(x[train, ], y[train], alpha = 0, lambda = grid) # si esegue la refressione ridge
@@ -243,11 +271,11 @@ plot(cv.out)
 bestlam <- cv.out$lambda.min
 
 ridge.pred <- predict(ridge.mod, s = bestlam, newx = x[test, ])
-mse_ridge <- mean((ridge.pred - y[test])^2)
-mse_ridge
+ridge.mse <- mean((ridge.pred - y[test])^2)
+ridge.mse
 
 ridge.out <- glmnet(x, y, alpha = 0, lambda = grid)
-ridge.coef <- predict(ridge.out, type = "coefficients", s = bestlam)[1:51, ]
+ridge.coef <- predict(ridge.out, type = "coefficients", s = bestlam)[1:p + 1, ]
 ridge.coef
 
 # dev.new()
@@ -255,23 +283,27 @@ ridge.coef
 dev.new()
 plot_glmnet(ridge.out, xvar = "lambda")
 
+################### Print Results ##################
+ridge.predictors <- round(ridge.coef / 100, digits = 0)
+intToUtf8(ridge.predictors)
+
 ####################################################
 ################### Elastic Net ####################
 ####################################################
 enet.mod <- glmnet(x[train, ], y[train], alpha = 0.1, lambda = grid)
-enet.pred <- predict(enet.mod, s = bestlam_enet, newx = x[test, ])
+enet.pred <- predict(enet.mod, s = 0.1, newx = x[test, ])
 min <- mean((enet.pred - y.test)^2)
 def.alp <- 0
-for (alp in seq(0.5, 1, by = 0.001)) {
+for (alp in seq(0.1, 0.9, by = 0.05)) { # siamo più dalla parte di lasso x il fatto che per dati molto incorrelati tra loro non conviene applicare ridge
   enet.mod <- glmnet(x[train, ], y[train], alpha = alp, lambda = grid)
   cv.out <- cv.glmnet(x[train, ], y[train], alpha = alp, lambda = grid)
-  bestlam_enet <- cv.out$lambda.min
+  enet.bestlam <- cv.out$lambda.min
 
-  enet.pred <- predict(enet.mod, s = bestlam_enet, newx = x[test, ])
-  mse_enet <- mean((enet.pred - y.test)^2)
+  enet.pred <- predict(enet.mod, s = enet.bestlam, newx = x[test, ])
+  enet.mse <- mean((enet.pred - y.test)^2)
 
-  if (mse_enet < min) {
-    min <- mse_enet
+  if (enet.mse < min) {
+    min <- enet.mse
     def.alp <- alp
   }
 }
@@ -286,22 +318,25 @@ plot_glmnet(enet.mod, xvar = "lambda")
 cv.out <- cv.glmnet(x[train, ], y[train], alpha = def.alp, lambda = grid)
 dev.new()
 plot(cv.out)
-bestlam_enet <- cv.out$lambda.min
+enet.bestlam <- cv.out$lambda.min
 
-enet.pred <- predict(enet.mod, s = bestlam_enet, newx = x[test, ])
-mse_enet <- mean((enet.pred - y.test)^2)
+enet.pred <- predict(enet.mod, s = enet.bestlam, newx = x[test, ])
+enet.mse <- mean((enet.pred - y.test)^2)
 
-elasticNet.coeff <- predict(enet.mod, type = "coefficients", s = bestlam_enet)[1:51, ]
+enet.coeff <- predict(enet.mod, type = "coefficients", s = enet.bestlam)[1:51, ]
 
-
-####################################################
 ################### Print Results ##################
-####################################################
-
-# Given the evidence taken from the values in the summary, we can arrive at the number of most important predictors, which is 17.
-# In particular, the predictors with bigger t-value and smaller Pr(>|t|) were choosen.
-n <- 17 # number of top predictors you want to save, based on the previous parameters
-top_n <- which(lasso.coef >= sort(lasso.coef, decreasing = TRUE)[n])
 # Finally, we took the vector with the best predictors estimate, we diveded by 100 and and we make the conversation in ASCII.
-predictors_elasticNet <- round(lasso.coef[top_n] / 100, digits = 0)
-intToUtf8(predictors_elasticNet)
+enet.predictors <- round(enet.coeff / 100, digits = 0)
+intToUtf8(enet.predictors)
+
+####################################################
+################### Stampa MSE #####################
+####################################################
+lm.mse
+fwd.mse
+bwd.mse
+hyb.mse
+lasso.mse
+ridge.mse
+enet.mse
