@@ -113,9 +113,9 @@ sns.heatmap(dft.corr())
 '''
     Summary of this block:
     This code is creating a plot of the proportion of variance explained by each principal component
-    and the cumulative variance explained by all principal components respectively. The plot is showing that 14 principal
+    and the cumulative variance explained by all principal components respectively. The plot is showing that 16 principal
     components allow to preserve around 90% of the total data set variance. Therefore, the number of components is set
-    to 14 and PCA is applied again to reduce the number of features in the dataset. The original shape and transformed shape
+    to 16 and PCA is applied again to reduce the number of features in the dataset. The original shape and transformed shape
     of the data are also printed to check the dimensionality reduction.
 '''
 # Create an array with index values from 1 to shape of X
@@ -147,8 +147,8 @@ ax2.set_ylabel('Cumulative variance explained', fontsize=14)  # y-axis label
 ax2 = sns.lineplot(x=idx-1, y='cumulative',
                    data=df_explained_variance_scale, color='k')
 
-# Perform dimensionality reduction using PCA with n_components=14
-m = 14
+# Perform dimensionality reduction using PCA with n_components=16
+m = 16
 pca_reduced = PCA(n_components=m)
 pca_reduced.fit(X_train_scale)
 X_pca_reduced = pca_reduced.transform(X_train_scale)
@@ -159,32 +159,21 @@ print("original shape:   ", X_train_scale.shape)
 print("transformed shape:", X_pca_reduced.shape)
 
 ##########################################################
-######## DATA VISUALIZATION BEFORE AND AFTER PCA #########
+############## DATA VISUALIZATION AFTER PCA ##############
 ##########################################################
 '''
     summary of this block:
-    This code is creating two figures, "AFTER PCA" and "BEFORE PCA".
-    - In the first figure, it's plotting a scatter plot of X_pca_reduced with the first column on the x-axis
+    This code is creating the figure "AFTER PCA".
+    - In the  figure, it's plotting a scatter plot of X_pca_reduced with the first column on the x-axis
     and the second column on the y-axis, and the color of each point is determined by the corresponding
     value in the y_train list (red if the value is 1, blue if the value is -1).
-    - In the second figure, it's plotting a scatter plot of X_train_scale with the first column on the x-axis
-    and the second column on the y-axis, and the color of each point is determined by the corresponding
-    value in the y_train list (red if the value is 1, blue if the value is -1).
-    Both figures are labeled with the x-axis labeled "PC1" and the y-axis labeled "PC2".
 '''
 # Set colors for each label in y_train
 colors = ['red' if label == 1 else 'blue' for label in y_train]
 
-
 plt.figure("Data visualization after PCA")
 # Plot the reduced data with PCA in 2D space
 plt.scatter(X_pca_reduced[:, 0], X_pca_reduced[:, 1], c=colors)
-plt.xlabel("PC1", fontsize=14)  # Label x-axis as PC1
-plt.ylabel("PC2", fontsize=14)  # Label y-axis as PC2
-
-plt.figure("Data visualization before PCA")
-# Plot the data before PCA in 2D space
-plt.scatter(X_train_scale[:, 0], X_pca_scale[:, 1], c=colors)
 plt.xlabel("PC1", fontsize=14)  # Label x-axis as PC1
 plt.ylabel("PC2", fontsize=14)  # Label y-axis as PC2
 
@@ -284,7 +273,7 @@ out_classifier = (classifier(X_pca_test, y_test, B_stimato))
 
 
 ##########################################################
-################### ASCII CONVERTION #####################
+################### ASCII CONVERSION #####################
 ##########################################################
 
 def bits_to_ascii(bits):
