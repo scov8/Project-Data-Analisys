@@ -9,7 +9,7 @@ library(leaps)    # Load the "leaps" package for BSS and stepwise
 library(car)      # Load the "car" package for Variance Inflation Factor (VIF) calculation
 
 # Load the dataset
-data <- read.csv("RegressionDataset_DA_group1.csv", header = T, na.strings = "?")
+data <- read.csv("RegressionDataset_DA_group11.csv", header = T, na.strings = "?")
 
 head(data)
 data <- na.omit(data) # Remove rows with missing values
@@ -47,8 +47,14 @@ lm.mod <- lm(Y ~ ., data = data[train, ]) # Fit a linear regression model to the
 summary(lm.mod) # Get the summary of the model
 lm.predict <- predict(lm.mod, newdata = (data[test, ])) # Make predictions using the model on the test data
 lm.coeff <- coef(lm.mod) # Get the coefficients of the model
+
+####################### Test ######################
 lm.mse <- mean((lm.predict - y[test])^2) # Calculate the mean squared error between the predicted values and the actual values in the test data
 lm.mse # Display the mean squared error
+
+################### Print Results ##################
+lm.predictors <- round(lm.coeff / 100, digits = 0) # Round the values in bwd.coef and divide by 100, with 0 decimal places
+intToUtf8(lm.predictors) # Convert the values in bwd.predictors to UTF-8 encoded integers
 
 # vif(lm.mod) # verifica la collinearità dei dati #CANCELLARE?????????
 

@@ -128,7 +128,7 @@ df_explained_variance_scale = pd.DataFrame([pca_scale.explained_variance_ratio_,
                                                'Proportion of variance explained', 'cumulative'],
                                            columns=idx).T
 
-# print(df_explained_variance_scale)
+print(df_explained_variance_scale)
 
 # Plot the proportion of variance explained and cumulative variance explained
 fig, ax1 = plt.subplots(
@@ -157,7 +157,6 @@ X_pca_test = pca_reduced.transform(X_test_scale)
 # Print the shape of the original and transformed datasets
 print("original shape:   ", X_train_scale.shape)
 print("transformed shape:", X_pca_reduced.shape)
-
 
 ##########################################################
 ######## DATA VISUALIZATION BEFORE AND AFTER PCA #########
@@ -189,10 +188,11 @@ plt.scatter(X_train_scale[:, 0], X_pca_scale[:, 1], c=colors)
 plt.xlabel("PC1", fontsize=14)  # Label x-axis as PC1
 plt.ylabel("PC2", fontsize=14)  # Label y-axis as PC2
 
-
 ##########################################################
 ################### GRADIENT DESCENT #####################
 ##########################################################
+
+
 def sgd(m, x_train, y_train, lr=0.0001, epochs=1000):
     '''
     The function sgd performs stochastic gradient descent on the input data x_train and corresponding labels y_train,
