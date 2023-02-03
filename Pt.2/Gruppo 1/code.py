@@ -153,8 +153,10 @@ ax2 = sns.lineplot(x=idx-1, y='cumulative',
 m = 16
 pca_scale_reduced = PCA(n_components=m)
 pca_scale_reduced.fit(X_train_scale)
-X_train_pca_scale_reduced = pca_scale_reduced.transform(X_train_scale)
-X_test_pca_scale_reduced = pca_scale_reduced.transform(X_test_scale)
+X_train_pca_scale_reduced = pca_scale_reduced.transform(
+    X_train_scale)  # Transform the train set
+X_test_pca_scale_reduced = pca_scale_reduced.transform(
+    X_test_scale)  # Transform the test set
 
 # Print the shape of the original and transformed datasets
 print("original shape:   ", X_train_scale.shape)
@@ -214,7 +216,7 @@ def sgd(m, x_train, y_train, lr=0.0001, epochs=1000):
         # Loop over the training data and target variables
         for x_i, y_i in zip(x_train, y_train):
             # Calculate gradient of the cost function
-            # grad = (-2*x_i.T) * (y_i - np.dot(x_i.T, beta_approx)) # MSE
+            # grad = (-2*x_i.T) * (y_i - np.dot(x_i.T, beta_approx))  # MSE
             grad = (-y_i * x_i.T) / (1 + np.exp(y_i *
                                                 np.dot(x_i.T, beta_approx)))  # logistic loss
 
@@ -224,10 +226,11 @@ def sgd(m, x_train, y_train, lr=0.0001, epochs=1000):
                 beta_dict[j] = beta_approx
                 j += 1
 
-        # Calculate the loss using mean squared error (MSE)(tra la y vera e quella predetta calcolata dal prodotto della x e dei beta)
-        # loss = np.mean((y_train - np.dot(x_train, beta_approx))**2) # MSE
+        # Calculate the loss after each iteration
+        #   loss = np.mean((y_train - np.dot(x_train, beta_approx))**2)  # MSE
+        # logistic loss
         loss = np.mean(
-            np.log(1 + np.exp(-y_train * np.dot(x_train, beta_approx))))  # logistic loss
+            np.log(1 + np.exp(-y_train * np.dot(x_train, beta_approx))))
         loss_history.append(loss)
     # Return the final values of beta stored in beta_dict and the loss history
     return beta_dict, loss_history
@@ -242,7 +245,7 @@ def try_lr(lr_array, epochs):
     '''
 
     for lr_i in lr_array:
-        print("I'm trying with lr=", lr_i, " and epochs=", epochs)
+        print("I'm trying with lr=", lr_i, "and epochs=", epochs)
         Beta, loss = sgd(m, X_train_pca_scale_reduced,
                          y_train, lr=lr_i, epochs=epochs)
 
@@ -254,10 +257,10 @@ def try_lr(lr_array, epochs):
         plt.title("Loss history, lr=" + str(lr_i) + ", epochs=" + str(epochs))
 
 
-lr = 0.0001
-epochs = 1000
+lr = 0.001  # best lr for MSE is 0.00001 and for logistic loss is 0.001
+epochs = 100
 
-try_lr([0.000001, 0.00001, 0.0001, 0.001, 0.01, 0.1], epochs)
+# try_lr([0.000001, 0.00001, 0.0001, 0.001, 0.01, 0.1], epochs)
 
 Beta, loss = sgd(m, X_train_pca_scale_reduced,
                  y_train, lr=lr, epochs=epochs)
