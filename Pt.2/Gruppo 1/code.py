@@ -18,22 +18,18 @@ sns.set()
 ##########################################################
 
 # Load training data
-mat = scipy.io.loadmat('train.mat')  # Load train.mat dataset into variable mat
-data = np.array(mat['train'])  # Create a numpy array from the data in mat
-# Assign all rows and all columns except the last one to X_train
-X_train = data[:, 0: data.shape[1]-1]
-y_train = data[:, [-1]]  # Assign the last column to y_train
-y_train = y_train.reshape(-1)  # Reshape y_train into a 1-dimensional array
+mat = scipy.io.loadmat('train.mat')     # Load train.mat dataset into variable mat
+data = np.array(mat['train'])           # Create a numpy array from the data in mat
+X_train = data[:, 0: data.shape[1]-1]   # Assign all rows and all columns except the last one to X_train
+y_train = data[:, [-1]]                 # Assign the last column to y_train
+y_train = y_train.reshape(-1)           # Reshape y_train into a 1-dimensional array
 
 # Load test data
-# Load test.mat dataset into variable mat_test
-mat_test = scipy.io.loadmat('test.mat')
-# Create a numpy array from the data in mat_test
-data_test = np.array(mat_test['test'])
-# Assign all rows and all columns except the last one to X_test
-X_test = data_test[:, 0: data_test.shape[1]-1]
-y_test = data_test[:, [-1]]  # Assign the last column to y_test
-y_test = y_test.reshape(-1)  # Reshape y_test into a 1-dimensional array
+mat_test = scipy.io.loadmat('test.mat')         # Load test.mat dataset into variable mat_test
+data_test = np.array(mat_test['test'])          # Create a numpy array from the data in mat_test
+X_test = data_test[:, 0: data_test.shape[1]-1]  # Assign all rows and all columns except the last one to X_test
+y_test = data_test[:, [-1]]                     # Assign the last column to y_test
+y_test = y_test.reshape(-1)                     # Reshape y_test into a 1-dimensional array
 
 # Print shapes of X_train, y_train, X_test, and y_test
 print("X_train shape:", X_train.shape)
@@ -135,7 +131,7 @@ print(df_explained_variance_scale)
 # Plot the proportion of variance explained and cumulative variance explained
 fig, ax1 = plt.subplots(
     num='Proportion of variance explained by each principal component')
-ax1.set_xlabel('Principal component', fontsize=14)  # x-axis label
+ax1.set_xlabel('Principal component', fontsize=14)               # x-axis label
 ax1.set_ylabel('Proportion of variance explained', fontsize=14)  # y-axis label
 
 # Plot the proportion of variance explained by each PC
@@ -216,21 +212,16 @@ def sgd(m, x_train, y_train, lr=0.0001, epochs=1000):
         # Loop over the training data and target variables
         for x_i, y_i in zip(x_train, y_train):
             # Calculate gradient of the cost function
-            # grad = (-2*x_i.T) * (y_i - np.dot(x_i.T, beta_approx))  # MSE
-            grad = (-y_i * x_i.T) / (1 + np.exp(y_i *
-                                                np.dot(x_i.T, beta_approx)))  # logistic loss
-
+            # grad = (-2*x_i.T) * (y_i - np.dot(x_i.T, beta_approx))                # MSE
+            grad = (-y_i * x_i.T) / (1 + np.exp(y_i * np.dot(x_i.T, beta_approx)))  # Logistic loss
             beta_approx -= lr*grad  # Update beta approximation using the calculated gradient
             # Store the final values of beta in beta_dict after the last iteration
             if (i == epochs-1):
                 beta_dict[j] = beta_approx
                 j += 1
-
         # Calculate the loss after each iteration
-        #   loss = np.mean((y_train - np.dot(x_train, beta_approx))**2)  # MSE
-        # logistic loss
-        loss = np.mean(
-            np.log(1 + np.exp(-y_train * np.dot(x_train, beta_approx))))
+        # loss = np.mean((y_train - np.dot(x_train, beta_approx))**2)               # MSE
+        loss = np.mean(np.log(1 + np.exp(-y_train * np.dot(x_train, beta_approx)))) # Logistic loss
         loss_history.append(loss)
     # Return the final values of beta stored in beta_dict and the loss history
     return beta_dict, loss_history
