@@ -81,28 +81,29 @@ sns.heatmap(df.corr())
 '''
     Summary of this block:
     This code performs PCA on the X_train_scale data, keeping all the components, and then creates a DataFrame from the
-    transformed X_pca_scale data. The correlation matrix of the X_pca_scale data is then displayed using a heatmap.
+    transformed X_train_pca_scale data. The correlation matrix of the X_train_pca_scale data is then displayed using a heatmap.
 '''
+
 # Perform PCA without specifying the n_components parameter, which means all components will be kept
 pca_scale = PCA()
 
 # Fit the PCA model to the X_train_scale data
 pca_scale.fit(X_train_scale)
 
-# Transform X_train_scale into a new array X_pca_scale by multiplying it with the PCA components
-X_pca_scale = pca_scale.transform(X_train_scale)
+# Transform X_train_scale into a new array X_train_pca_scale by multiplying it with the PCA components
+X_train_pca_scale = pca_scale.transform(X_train_scale)
 
-# Create a DataFrame from the X_pca_scale array and display the correlation matrix for the transformed data after PCA
-dft = pd.DataFrame.from_dict({'PC1': X_pca_scale[:, 0], 'PC2': X_pca_scale[:, 1],
-                              'PC3': X_pca_scale[:, 2], 'PC4': X_pca_scale[:, 3],
-                              'PC5': X_pca_scale[:, 4], 'PC6': X_pca_scale[:, 5],
-                              'PC7': X_pca_scale[:, 6], 'PC8': X_pca_scale[:, 7],
-                              'PC9': X_pca_scale[:, 8], 'PC10': X_pca_scale[:, 9],
-                              'PC11': X_pca_scale[:, 10], 'PC12': X_pca_scale[:, 11],
-                              'PC13': X_pca_scale[:, 12], 'PC14': X_pca_scale[:, 13],
-                              'PC15': X_pca_scale[:, 14], 'PC16': X_pca_scale[:, 15],
-                              'PC17': X_pca_scale[:, 16], 'PC18': X_pca_scale[:, 17],
-                              'PC19': X_pca_scale[:, 18], 'PC20': X_pca_scale[:, 19]})
+# Create a DataFrame from the X_train_pca_scale array and display the correlation matrix for the transformed data after PCA
+dft = pd.DataFrame.from_dict({'PC1': X_train_pca_scale[:, 0], 'PC2': X_train_pca_scale[:, 1],
+                              'PC3': X_train_pca_scale[:, 2], 'PC4': X_train_pca_scale[:, 3],
+                              'PC5': X_train_pca_scale[:, 4], 'PC6': X_train_pca_scale[:, 5],
+                              'PC7': X_train_pca_scale[:, 6], 'PC8': X_train_pca_scale[:, 7],
+                              'PC9': X_train_pca_scale[:, 8], 'PC10': X_train_pca_scale[:, 9],
+                              'PC11': X_train_pca_scale[:, 10], 'PC12': X_train_pca_scale[:, 11],
+                              'PC13': X_train_pca_scale[:, 12], 'PC14': X_train_pca_scale[:, 13],
+                              'PC15': X_train_pca_scale[:, 14], 'PC16': X_train_pca_scale[:, 15],
+                              'PC17': X_train_pca_scale[:, 16], 'PC18': X_train_pca_scale[:, 17],
+                              'PC19': X_train_pca_scale[:, 18], 'PC20': X_train_pca_scale[:, 19]})
 
 plt.figure("Correlation matrix after PCA")
 sns.heatmap(dft.corr())
@@ -114,10 +115,11 @@ sns.heatmap(dft.corr())
     Summary of this block:
     This code is creating a plot of the proportion of variance explained by each principal component
     and the cumulative variance explained by all principal components respectively. The plot is showing that 16 principal
-    components allow to preserve around 90% of the total data set variance. Therefore, the number of components is set
+    components allow to preserve around 95% of the total data set variance. Therefore, the number of components is set
     to 16 and PCA is applied again to reduce the number of features in the dataset. The original shape and transformed shape
     of the data are also printed to check the dimensionality reduction.
 '''
+
 # Create an array with index values from 1 to shape of X
 idx = np.arange(X_train_scale.shape[1])+1
 
@@ -147,16 +149,16 @@ ax2.set_ylabel('Cumulative variance explained', fontsize=14)  # y-axis label
 ax2 = sns.lineplot(x=idx-1, y='cumulative',
                    data=df_explained_variance_scale, color='k')
 
-# Perform dimensionality reduction using PCA with n_components=16
+# Perform dimensionality reduction on the train and test set using PCA with n_components=16
 m = 16
-pca_reduced = PCA(n_components=m)
-pca_reduced.fit(X_train_scale)
-X_pca_reduced = pca_reduced.transform(X_train_scale)
-X_pca_test = pca_reduced.transform(X_test_scale)
+pca_scale_reduced = PCA(n_components=m)
+pca_scale_reduced.fit(X_train_scale)
+X_train_pca_scale_reduced = pca_scale_reduced.transform(X_train_scale)
+X_test_pca_scale_reduced = pca_scale_reduced.transform(X_test_scale)
 
 # Print the shape of the original and transformed datasets
 print("original shape:   ", X_train_scale.shape)
-print("transformed shape:", X_pca_reduced.shape)
+print("transformed shape:", X_train_pca_scale_reduced.shape)
 
 ##########################################################
 ############## DATA VISUALIZATION AFTER PCA ##############
@@ -164,7 +166,7 @@ print("transformed shape:", X_pca_reduced.shape)
 '''
     summary of this block:
     This code is creating the figure "AFTER PCA".
-    - In the  figure, it's plotting a scatter plot of X_pca_reduced with the first column on the x-axis
+    - In the  figure, it's plotting a scatter plot of X_train_pca_scale_reduced with the first column on the x-axis
     and the second column on the y-axis, and the color of each point is determined by the corresponding
     value in the y_train list (red if the value is 1, blue if the value is -1).
 '''
@@ -173,7 +175,8 @@ colors = ['red' if label == 1 else 'blue' for label in y_train]
 
 plt.figure("Data visualization after PCA")
 # Plot the reduced data with PCA in 2D space
-plt.scatter(X_pca_reduced[:, 0], X_pca_reduced[:, 1], c=colors)
+plt.scatter(X_train_pca_scale_reduced[:, 0],
+            X_train_pca_scale_reduced[:, 1], c=colors)
 plt.xlabel("PC1", fontsize=14)  # Label x-axis as PC1
 plt.ylabel("PC2", fontsize=14)  # Label y-axis as PC2
 
@@ -211,7 +214,10 @@ def sgd(m, x_train, y_train, lr=0.0001, epochs=1000):
         # Loop over the training data and target variables
         for x_i, y_i in zip(x_train, y_train):
             # Calculate gradient of the cost function
-            grad = (-2*x_i.T) * (y_i - np.dot(x_i.T, beta_approx))
+            # grad = (-2*x_i.T) * (y_i - np.dot(x_i.T, beta_approx)) # MSE
+            grad = (-y_i * x_i.T) / (1 + np.exp(y_i *
+                                                np.dot(x_i.T, beta_approx)))  # logistic loss
+
             beta_approx -= lr*grad  # Update beta approximation using the calculated gradient
             # Store the final values of beta in beta_dict after the last iteration
             if (i == epochs-1):
@@ -219,22 +225,49 @@ def sgd(m, x_train, y_train, lr=0.0001, epochs=1000):
                 j += 1
 
         # Calculate the loss using mean squared error (MSE)(tra la y vera e quella predetta calcolata dal prodotto della x e dei beta)
-        loss = np.mean((y_train - np.dot(x_train, beta_approx))**2)
-
+        # loss = np.mean((y_train - np.dot(x_train, beta_approx))**2) # MSE
+        loss = np.mean(
+            np.log(1 + np.exp(-y_train * np.dot(x_train, beta_approx))))  # logistic loss
         loss_history.append(loss)
     # Return the final values of beta stored in beta_dict and the loss history
     return beta_dict, loss_history
 
 
-lr = 0.00001
-epochs = 100
-B_stimato, loss = sgd(m, X_pca_reduced, y_train, lr=lr, epochs=epochs)
+def try_lr(lr_array, epochs):
+    '''
+    The function try_lr is used to try different learning rates and plot the loss history for each learning rate.
+    Args:
+        lr_array (list): list of learning rates to try
+        epochs (int): number of epochs
+    '''
+
+    for lr_i in lr_array:
+        print("I'm trying with lr=", lr_i, " and epochs=", epochs)
+        Beta, loss = sgd(m, X_train_pca_scale_reduced,
+                         y_train, lr=lr_i, epochs=epochs)
+
+        plt.figure("Gradient descent, lr=" +
+                   str(lr_i) + ", epochs=" + str(epochs))
+        plt.plot(loss)
+        plt.xlabel('Epoch')
+        plt.ylabel('Loss')
+        plt.title("Loss history, lr=" + str(lr_i) + ", epochs=" + str(epochs))
+
+
+lr = 0.0001
+epochs = 1000
+
+try_lr([0.000001, 0.00001, 0.0001, 0.001, 0.01, 0.1], epochs)
+
+Beta, loss = sgd(m, X_train_pca_scale_reduced,
+                 y_train, lr=lr, epochs=epochs)
 
 plt.figure("Gradient descent, lr=" + str(lr) + ", epochs=" + str(epochs))
 plt.plot(loss)
 plt.xlabel('Epoch')
 plt.ylabel('Loss')
 plt.title("Loss history, lr=" + str(lr) + ", epochs=" + str(epochs))
+
 
 ##########################################################
 ###################### CLASSIFIER ########################
@@ -269,7 +302,7 @@ def classifier(X, y, Beta):
 
 
 # call the function and store the output to the out_classifier
-out_classifier = (classifier(X_pca_test, y_test, B_stimato))
+out_classifier = (classifier(X_test_pca_scale_reduced, y_test, Beta))
 
 
 ##########################################################
