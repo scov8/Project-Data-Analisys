@@ -37,10 +37,6 @@ print("y_train shape:", y_train.shape)
 print("X_test shape:", X_test.shape)
 print("y_test shape:", y_test.shape)
 
-# Center the data by subtracting the mean from each feature (for both train and test data)
-X_train = X_train - np.mean(X_train, axis=0)
-X_test = X_test - np.mean(X_test, axis=0)
-
 # Standardize the features (mean 0, var 1)
 scaler = StandardScaler()
 X_train_scale = scaler.fit_transform(X_train)
@@ -122,8 +118,7 @@ idx = np.arange(X_train_scale.shape[1])+1
 # Calculate the proportion of variance explained by each PC and the cumulative variance explained
 df_explained_variance_scale = pd.DataFrame([pca_scale.explained_variance_ratio_,
                                             np.cumsum(pca_scale.explained_variance_ratio_)],
-                                           index=[
-                                               'Proportion of variance explained', 'cumulative'],
+                                           index=['Proportion of variance explained', 'cumulative'],
                                            columns=idx).T
 
 print(df_explained_variance_scale)
