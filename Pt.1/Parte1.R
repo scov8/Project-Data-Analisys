@@ -46,7 +46,7 @@ corPlot(corData, cex = 0.22, show.legend = TRUE, main = "Correlation Matrix") # 
 lm.mod <- lm(Y ~ ., data = data[train, ]) # Fit a linear regression model to the data, using all variables in training set
 summary(lm.mod) # Get the summary of the model
 lm.predict <- predict(lm.mod, newdata = (data[test, ])) # Make predictions using the model on the test data
-lm.coeff <- coef(lm.mod) # Get the coefficients of the model
+lm.coef <- coef(lm.mod) # Get the coefficients of the model
 
 ####################### Test ######################
 lm.mse <- mean((lm.predict - y[test])^2) # Calculate the mean squared error between the predicted values and the actual values in the test data
@@ -202,6 +202,41 @@ hyb.predictors <- round(hyb.coef / 100, digits = 0) # Round the values in hyb.co
 intToUtf8(hyb.predictors) # Convert the values in hyb.predictors to UTF-8 encoded integers
 
 ####################################################
+###################### Ridge #######################
+####################################################
+grid <- 10^seq(5, -2, length = 1000) # Define a sequence of 1000 numbers logarithmically spaced between 10^5 and 10^-2
+
+# Use the argument alpha = 0 to perform ridge
+ridge.mod <- glmnet(x[train, ], y[train], alpha = 0, lambda = grid) # Fit a ridge regression model with alpha=0 and the grid of lambda values defined earlier
+
+dev.new()
+plot_glmnet(ridge.mod, xvar = "lambda") # Plot the ridge regression model, with x-axis as log lambda
+
+# Perform 10-fold cross-validation to determine the best lambda value for the ridge model
+cv.out <- cv.glmnet(x[train, ], y[train], alpha = 0, lambda = grid)
+
+dev.new()
+plot(cv.out) # Plot the cross-validation results
+
+bestlam <- cv.out$lambda.min # Get the best lambda value from cross-validation
+
+ridge.pred <- predict(ridge.mod, s = bestlam, newx = x[test, ]) # Calculate the predictions using the best lambda value
+ridge.mse <- mean((ridge.pred - y[test])^2) # Calculate the mean squared error of the predictions on test set
+ridge.mse # Print the mean squared error
+
+ridge.out <- glmnet(x, y, alpha = 0, lambda = grid) # Fit the ridge regression model to the entire data set
+ridge.coef <- predict(ridge.out, type = "coefficients", s = bestlam)[1:p + 1, ] # Get the coefficients for the best lambda value
+ridge.coef # Print the coefficients
+
+dev.new()
+plot_glmnet(ridge.out, xvar = "lambda") # Plot the ridge regression model for the entire data set
+
+################### Print Results ##################
+# Round the coefficients and convert to utf-8 format
+ridge.predictors <- round(ridge.coef / 100, digits = 0)
+intToUtf8(ridge.predictors)
+
+####################################################
 ###################### LASSO #######################
 ####################################################
 grid <- 10^seq(5, -2, length = 1000) # Define a sequence of 1000 numbers logarithmically spaced between 10^5 and 10^-2
@@ -242,41 +277,6 @@ plot_glmnet(lasso.out, xvar = "lambda") # Plot the lasso model fit to the entire
 # Round the coefficient values to the nearest 100 and convert the result to UTF-8
 lasso.predictors <- round(lasso.coef / 100, digits = 0)
 intToUtf8(lasso.predictors)
-
-####################################################
-###################### Ridge #######################
-####################################################
-grid <- 10^seq(5, -2, length = 1000) # Define a sequence of 1000 numbers logarithmically spaced between 10^5 and 10^-2
-
-# Use the argument alpha = 0 to perform ridge
-ridge.mod <- glmnet(x[train, ], y[train], alpha = 0, lambda = grid) # Fit a ridge regression model with alpha=0 and the grid of lambda values defined earlier
-
-dev.new()
-plot_glmnet(ridge.mod, xvar = "lambda") # Plot the ridge regression model, with x-axis as log lambda
-
-# Perform 10-fold cross-validation to determine the best lambda value for the ridge model
-cv.out <- cv.glmnet(x[train, ], y[train], alpha = 0, lambda = grid)
-
-dev.new()
-plot(cv.out) # Plot the cross-validation results
-
-bestlam <- cv.out$lambda.min # Get the best lambda value from cross-validation
-
-ridge.pred <- predict(ridge.mod, s = bestlam, newx = x[test, ]) # Calculate the predictions using the best lambda value
-ridge.mse <- mean((ridge.pred - y[test])^2) # Calculate the mean squared error of the predictions on test set
-ridge.mse # Print the mean squared error
-
-ridge.out <- glmnet(x, y, alpha = 0, lambda = grid) # Fit the ridge regression model to the entire data set
-ridge.coef <- predict(ridge.out, type = "coefficients", s = bestlam)[1:p + 1, ] # Get the coefficients for the best lambda value
-ridge.coef # Print the coefficients
-
-dev.new()
-plot_glmnet(ridge.out, xvar = "lambda") # Plot the ridge regression model for the entire data set
-
-################### Print Results ##################
-# Round the coefficients and convert to utf-8 format
-ridge.predictors <- round(ridge.coef / 100, digits = 0)
-intToUtf8(ridge.predictors)
 
 ####################################################
 ################### Elastic Net ####################
