@@ -9,7 +9,7 @@ library(leaps)    # Load the "leaps" package for BSS and stepwise
 library(car)      # Load the "car" package for Variance Inflation Factor (VIF) calculation
 
 # Load the dataset
-data <- read.csv("RegressionDataset_DA_group11.csv", header = T, na.strings = "?")
+data <- read.csv("RegressionDataset_DA_group1.csv", header = T, na.strings = "?")
 
 head(data)
 data <- na.omit(data) # Remove rows with missing values
@@ -53,7 +53,7 @@ lm.mse <- mean((lm.predict - y[test])^2) # Calculate the mean squared error betw
 lm.mse # Display the mean squared error
 
 ################### Print Results ##################
-lm.predictors <- round(lm.coeff / 100, digits = 0) # Round the values in bwd.coef and divide by 100, with 0 decimal places
+lm.predictors <- round(lm.coef / 100, digits = 0) # Round the values in bwd.coef and divide by 100, with 0 decimal places
 intToUtf8(lm.predictors) # Convert the values in bwd.predictors to UTF-8 encoded integers
 
 # vif(lm.mod) # verifica la collinearità dei dati #CANCELLARE?????????
@@ -323,11 +323,11 @@ enet.bestlam <- cv.out$lambda.min # Get the best lambda value
 enet.pred <- predict(enet.mod, s = enet.bestlam, newx = x[test, ]) # Predict using the fitted model and the best lambda value
 enet.mse <- mean((enet.pred - y.test)^2) # Calculate the mean squared error
 
-enet.coeff <- predict(enet.mod, type = "coefficients", s = enet.bestlam)[1:p+1, ] # Get the coefficients for the fitted model with the best lambda value
+enet.coef <- predict(enet.mod, type = "coefficients", s = enet.bestlam)[1:p+1, ] # Get the coefficients for the fitted model with the best lambda value
 
 ################### Print Results ##################
 # Finally, we took the vector with the best predictors estimate, we diveded by 100 and and we make the conversation in ASCII.
-enet.predictors <- round(enet.coeff / 100, digits = 0)
+enet.predictors <- round(enet.coef / 100, digits = 0)
 intToUtf8(enet.predictors)
 
 ####################################################
