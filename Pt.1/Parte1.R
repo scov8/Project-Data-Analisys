@@ -14,7 +14,7 @@ data <- read.csv("RegressionDataset_DA_group1.csv", header = T, na.strings = "?"
 head(data)
 data <- na.omit(data) # Remove rows with missing values
 
-set.seed(1985)        # Use a fixed seed for reproducibility of the experiment
+set.seed(1)        # Use a fixed seed for reproducibility of the experiment
 
 # Save "Y" values in "y" and all values except for "Y" in "x"
 x <- model.matrix(Y ~ ., data)[, -1] # Save all values except for "Y"
