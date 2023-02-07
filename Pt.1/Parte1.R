@@ -131,68 +131,43 @@ hyb.mse <- val.errors[min] # Stores the minimum MSE value in 'hyb.mse'
 hyb.coef <- coef(hyb.regfit, which.min(val.errors)) # Extracts the coefficients for the best model obtained from hybrid selection
 
 ######################## Plot ########################
-dev.new()
-# Uncomment the next line to save the plot as a PDF file
-# pdf(file="backward_cp.pdf", width=20, height=10)
-plot(bwd.regfit, scale = "Cp")
-title("Backward selection with Cp")
-# dev.off()
+# Function for plotting all metrics
+plot_metrics <- function(model, name){
+  dev.new()
+  # Uncomment the next line to save the plot as a PDF file
+  # pdf(file="backward_cp.pdf", width=20, height=10)
+  par(mfrow=c(2,2))
+  
+  summary=summary(model)
+  
+  plot(round(summary$rss, 3), xlab="Number of Variables ", ylab="RSS", type="l")
+  points(which.min(round(summary$rss, 3)),min(round(summary$rss,3)), col="red",cex=2,pch=20)
+  
+  plot(round(summary$adjr2, 3) ,xlab="Number of Variables ", ylab="Adjusted RSq",type="l")
+  points(which.max(round(summary$adjr2, 3)),max(round(summary$adjr2,3)), col="red",cex=2,pch=20)
+  
+  plot(round(summary$cp,3) ,xlab="Number of Variables ",ylab="Cp", type="l")
+  points(which.min(round(summary$cp,3)),min(round(summary$cp,3)),col="red",cex=2,pch=20)
+  
+  plot(round(summary$bic,3) ,xlab="Number of Variables ",ylab="BIC",type="l")
+  points(which.min(round(summary$bic,3)),min(round(summary$bic, 3)),col="red",cex=2,pch=20)
+  
+  mtext(name, line=-3, outer=TRUE, side=3)
+  
+  dev.new()
+  par(mfrow=c(1,3))
+  
+  plot(model, scale = "Cp", xlab="Variables ",ylab="CP",type="l")
+  
+  plot(model, scale = "bic", xlab="Variables ",ylab="CP",type="l")
+  
+  plot(model, scale = "adjr2", xlab="Variables ",ylab="CP",type="l")
+  mtext(name, line=-3, outer=TRUE, side=3)
+}
 
-dev.new()
-# Uncomment the next line to save the plot as a PDF file
-# pdf(file="forward_cp.pdf", width=20, height=10)
-plot(fwd.regfit, scale = "Cp")
-title("Forward selection with Cp")
-# dev.off()
-
-dev.new()
-# Uncomment the next line to save the plot as a PDF file
-# pdf(file="hybrid_cp.pdf", width=20, height=10)
-plot(hyb.regfit, scale = "Cp")
-title("Hybrid selection with Cp")
-# dev.off()
-
-dev.new()
-# Uncomment the next line to save the plot as a PDF file
-# pdf(file="backward_bic.pdf", width=20, height=10)
-plot(bwd.regfit, scale = "bic")
-title("Backward selection with bic")
-# dev.off()
-
-dev.new()
-# Uncomment the next line to save the plot as a PDF file
-# pdf(file="forward_bic.pdf", width=20, height=10)
-plot(fwd.regfit, scale = "bic")
-title("Forward selection with bic")
-# dev.off()
-
-dev.new()
-# Uncomment the next line to save the plot as a PDF file
-# pdf(file="hybrid_bic.pdf", width=20, height=10)
-plot(hyb.regfit, scale = "bic")
-title("Hybrid selection with bic")
-# dev.off()
-
-dev.new()
-# Uncomment the next line to save the plot as a PDF file
-# pdf(file="backward_adjr.pdf", width=20, height=10)
-plot(bwd.regfit, scale = "adjr2")
-title("Backward selection with adjr2")
-# dev.off()
-
-dev.new()
-# Uncomment the next line to save the plot as a PDF file
-# pdf(file="forward_adjr.pdf", width=20, height=10)
-plot(fwd.regfit, scale = "adjr2")
-title("Forward selection with adjr2")
-# dev.off()
-
-dev.new()
-# Uncomment the next line to save the plot as a PDF file
-# pdf(file="hybrid_adjr.pdf", width=20, height=10)
-plot(hyb.regfit, scale = "adjr2")
-title("Hybrid selection with adjr2")
-# dev.off()
+plot_metrics(fwd.regfit, "Forward Stepwise")
+plot_metrics(bwd.regfit, "Backward Stepwise")
+plot_metrics(hyb.regfit, "Hybrid Stepwise")
 
 ################### Print Results ##################
 bwd.predictors <- round(bwd.coef / 100, digits = 0) # Round the values in bwd.coef and divide by 100, with 0 decimal places
@@ -242,7 +217,7 @@ intToUtf8(ridge.predictors)
 ####################################################
 ###################### LASSO #######################
 ####################################################
-grid <- 10^seq(5, -2, length = 1000) # Define a sequence of 1000 numbers logarithmically spaced between 10^5 and 10^-2
+grid <- 10^seq(10, -10, length = 1000) # Define a sequence of 1000 numbers logarithmically spaced between 10^5 and 10^-2
 
 # use the argument alpha = 1 to perform lasso
 lasso.mod <- glmnet(x[train, ], y[train], alpha = 1, lambda = grid) # Fit a lasso regression model with alpha=1 and the grid of lambda values defined earlier
