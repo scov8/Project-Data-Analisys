@@ -189,12 +189,14 @@ ridge.mod <- glmnet(x[train, ], y[train], alpha = 0, lambda = grid) # Fit a ridg
 
 dev.new()
 plot_glmnet(ridge.mod, xvar = "lambda") # Plot the ridge regression model, with x-axis as log lambda
+mtext("Ridge", line=-1.3, outer=TRUE, side=3)
 
 # Perform 10-fold cross-validation to determine the best lambda value for the ridge model
 cv.out <- cv.glmnet(x[train, ], y[train], alpha = 0, lambda = grid)
 
 dev.new()
 plot(cv.out) # Plot the cross-validation results
+mtext("Ridge", line=-1.3, outer=TRUE, side=3)
 
 ridge.bestlam <- cv.out$lambda.min # Get the best lambda value from cross-validation
 
@@ -208,6 +210,7 @@ ridge.coef # Print the coefficients
 
 dev.new()
 plot_glmnet(ridge.out, xvar = "lambda") # Plot the ridge regression model for the entire data set
+mtext("Ridge", line=-1.3, outer=TRUE, side=3)
 
 ################### Print Results ##################
 # Round the coefficients and convert to utf-8 format
@@ -224,15 +227,18 @@ lasso.mod <- glmnet(x[train, ], y[train], alpha = 1, lambda = grid) # Fit a lass
 
 dev.new()
 plot(lasso.mod, label = T) # Plot the model fit to the training data as a function of L1 norm
+mtext("Lasso", line=-1.3, outer=TRUE, side=3)
 
 dev.new()
 plot_glmnet(lasso.mod, xvar = "lambda") # Plot the model fit to the training data as a function of log lambda using plot_glmnet() function
+mtext("Lasso", line=-1.3, outer=TRUE, side=3)
 
 # Perform 10-fold cross-validation to determine the best lambda value for the lasso model
 cv.out <- cv.glmnet(x[train, ], y[train], alpha = 1, lambda = grid)
 
 dev.new()
 plot(cv.out) # Plot the cross-validation results
+mtext("Lasso", line=-1.3, outer=TRUE, side=3)
 
 lasso.bestlam <- cv.out$lambda.1se # Determine the best lambda value based on the cross-validation results, we choose the 1se to select
                              # the most parsimonious model with low error 
@@ -250,6 +256,7 @@ cat("Number of coefficients equal to 0:", sum(lasso.coef == 0), "\n") # Print th
 
 dev.new()
 plot_glmnet(lasso.out, xvar = "lambda") # Plot the lasso model fit to the entire data set as a function of log lambda using plot_glmnet() function
+mtext("Lasso", line=-1.3, outer=TRUE, side=3)
 
 ################### Print Results ##################
 # Round the coefficient values to the nearest 100 and convert the result to UTF-8
@@ -286,15 +293,18 @@ enet.mod <- glmnet(x[train, ], y[train], alpha = def.alp, lambda = grid)
 # Plot the fitted model
 dev.new()
 plot(enet.mod, label = T)
+mtext("Elastic Net", line=-1.3, outer=TRUE, side=3)
+
 dev.new()
-plot(enet.mod, label = T, xvar = "lambda")
 plot_glmnet(enet.mod, xvar = "lambda")
+mtext("Elastic Net", line=-1.3, outer=TRUE, side=3)
 
 cv.out <- cv.glmnet(x[train, ], y[train], alpha = def.alp, lambda = grid) # Perform cross-validation
 
 # Plot the cross-validation results
 dev.new()
 plot(cv.out)
+mtext("Elastic Net", line=-1.3, outer=TRUE, side=3)
 
 enet.bestlam <- cv.out$lambda.min # Get the best lambda value
 

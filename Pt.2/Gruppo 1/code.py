@@ -178,7 +178,7 @@ plt.ylabel("PC2", fontsize=14)  # Label y-axis as PC2
 ##########################################################
 
 
-def sgd(m, x_train, y_train, lr=0.0001, epochs=1000):
+def sgd(m, x_train, y_train, lr=0.0001, epochs=100):
     '''
     The function sgd performs stochastic gradient descent on the input data x_train and corresponding labels y_train,
     using a learning rate lr and a specified number of epochs.
