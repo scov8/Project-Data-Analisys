@@ -8,7 +8,7 @@ library(psych)    # Load the "psych" package
 library(leaps)    # Load the "leaps" package for BSS and stepwise
 
 # Load the dataset
-data <- read.csv("RegressionDataset_DA_group1.csv", header = T, na.strings = "?")
+data <- read.csv("RegressionExam_8feb23.csv", header = T, na.strings = "?")
 
 head(data)
 data <- na.omit(data) # Remove rows with missing values
@@ -135,7 +135,7 @@ hyb.coef <- coef(hyb.regfit, which.min(val.errors)) # Extracts the coefficients 
 plot_metrics <- function(model, name){
   dev.new()
   # Uncomment the next line to save the plot as a PDF file
-  # pdf(file="backward_cp.pdf", width=20, height=10)
+  # pdf(file="Forward1.pdf", width=20, height=10)
   par(mfrow=c(2,2))
   
   summary=summary(model)
@@ -153,8 +153,10 @@ plot_metrics <- function(model, name){
   points(which.min(round(summary$bic,3)),min(round(summary$bic, 3)),col="red",cex=2,pch=20)
   
   mtext(name, line=-3, outer=TRUE, side=3)
-  
+  # dev.off()
   dev.new()
+  # Uncomment the next line to save the plot as a PDF file
+  # pdf(file="Forward2.pdf", width=20, height=10)
   par(mfrow=c(1,3))
   
   plot(model, scale = "Cp", xlab="Variables ",ylab="CP",type="l")
@@ -163,6 +165,7 @@ plot_metrics <- function(model, name){
   
   plot(model, scale = "adjr2", xlab="Variables ",ylab="CP",type="l")
   mtext(name, line=-3, outer=TRUE, side=3)
+  # dev.off()
 }
 
 plot_metrics(fwd.regfit, "Forward Stepwise")
@@ -188,15 +191,21 @@ grid <- 10^seq(10, -10, length = 1000) # Define a sequence of 1000 numbers logar
 ridge.mod <- glmnet(x[train, ], y[train], alpha = 0, lambda = grid) # Fit a ridge regression model with alpha=0 and the grid of lambda values defined earlier
 
 dev.new()
+# Uncomment the next line to save the plot as a PDF file
+# pdf(file="Ridge.pdf", width=10, height=10)
 plot_glmnet(ridge.mod, xvar = "lambda") # Plot the ridge regression model, with x-axis as log lambda
 mtext("Ridge", line=-1.3, outer=TRUE, side=3)
+# dev.off()
 
 # Perform 10-fold cross-validation to determine the best lambda value for the ridge model
 cv.out <- cv.glmnet(x[train, ], y[train], alpha = 0, lambda = grid)
 
 dev.new()
+# Uncomment the next line to save the plot as a PDF file
+# pdf(file="RidgeCV.pdf", width=10, height=10)
 plot(cv.out) # Plot the cross-validation results
 mtext("Ridge", line=-1.3, outer=TRUE, side=3)
+# dev.off()
 
 ridge.bestlam <- cv.out$lambda.min # Get the best lambda value from cross-validation
 
@@ -230,15 +239,21 @@ plot(lasso.mod, label = T) # Plot the model fit to the training data as a functi
 mtext("Lasso", line=-1.3, outer=TRUE, side=3)
 
 dev.new()
+# Uncomment the next line to save the plot as a PDF file
+# pdf(file="Lasso.pdf", width=10, height=10)
 plot_glmnet(lasso.mod, xvar = "lambda") # Plot the model fit to the training data as a function of log lambda using plot_glmnet() function
 mtext("Lasso", line=-1.3, outer=TRUE, side=3)
+# dev.off()
 
 # Perform 10-fold cross-validation to determine the best lambda value for the lasso model
 cv.out <- cv.glmnet(x[train, ], y[train], alpha = 1, lambda = grid)
 
 dev.new()
+# Uncomment the next line to save the plot as a PDF file
+# pdf(file="LassoCV.pdf", width=10, height=10)
 plot(cv.out) # Plot the cross-validation results
 mtext("Lasso", line=-1.3, outer=TRUE, side=3)
+# dev.off()
 
 lasso.bestlam <- cv.out$lambda.1se # Determine the best lambda value based on the cross-validation results, we choose the 1se to select
                              # the most parsimonious model with low error 
@@ -273,10 +288,10 @@ def.alp <- 0 # Initialize default alpha value
 
 # Loop through different alpha values from 0.5 to 0.9 with a step of 0.05
 # This loop is more towards the lasso side since it's not recommended to apply ridge for highly uncorrelated data
-for (alp in seq(0.5, 0.9, by = 0.05)) {
+for (alp in seq(0.1, 0.9, by = 0.05)) {
   enet.mod <- glmnet(x[train, ], y[train], alpha = alp, lambda = grid) # Fit the Elastic Net Model with the current alpha value
   cv.out <- cv.glmnet(x[train, ], y[train], alpha = alp, lambda = grid) # Perform cross-validation to find the best lambda value
-  enet.bestlam <- cv.out$lambda.min # Get the best lambda value
+  enet.bestlam <- cv.out$lambda.1se # Get the best lambda value
   
   enet.pred <- predict(enet.mod, s = enet.bestlam, newx = x[test, ]) # Predict using the fitted model and the best lambda value
   enet.mse <- mean((enet.pred - y[test])^2) # Calculate the mean squared error
@@ -290,23 +305,26 @@ for (alp in seq(0.5, 0.9, by = 0.05)) {
 
 # Fit the Elastic Net Model with the best default alpha value
 enet.mod <- glmnet(x[train, ], y[train], alpha = def.alp, lambda = grid)
+
 # Plot the fitted model
 dev.new()
-plot(enet.mod, label = T)
-mtext("Elastic Net", line=-1.3, outer=TRUE, side=3)
-
-dev.new()
+# Uncomment the next line to save the plot as a PDF file
+# pdf(file="Enet.pdf", width=10, height=10)
 plot_glmnet(enet.mod, xvar = "lambda")
 mtext("Elastic Net", line=-1.3, outer=TRUE, side=3)
+# dev.off()
 
 cv.out <- cv.glmnet(x[train, ], y[train], alpha = def.alp, lambda = grid) # Perform cross-validation
 
 # Plot the cross-validation results
 dev.new()
+# Uncomment the next line to save the plot as a PDF file
+# pdf(file="EnetCV.pdf", width=10, height=10)
 plot(cv.out)
 mtext("Elastic Net", line=-1.3, outer=TRUE, side=3)
+# dev.off()
 
-enet.bestlam <- cv.out$lambda.min # Get the best lambda value
+enet.bestlam <- cv.out$lambda.1se # Get the best lambda value
 
 enet.pred <- predict(enet.mod, s = enet.bestlam, newx = x[test, ]) # Predict using the fitted model and the best lambda value
 enet.mse <- mean((enet.pred - y[test])^2) # Calculate the mean squared error

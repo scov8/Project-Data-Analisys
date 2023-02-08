@@ -18,14 +18,14 @@ sns.set()
 ##########################################################
 
 # Load training data
-mat = scipy.io.loadmat('train.mat')     # Load train.mat dataset into variable mat
+mat = scipy.io.loadmat('train_8feb23.mat')     # Load train.mat dataset into variable mat
 data = np.array(mat['train'])           # Create a numpy array from the data in mat
 X_train = data[:, 0: data.shape[1]-1]   # Assign all rows and all columns except the last one to X_train
 y_train = data[:, [-1]]                 # Assign the last column to y_train
 y_train = y_train.reshape(-1)           # Reshape y_train into a 1-dimensional array
 
 # Load test data
-mat_test = scipy.io.loadmat('test.mat')         # Load test.mat dataset into variable mat_test
+mat_test = scipy.io.loadmat('test_8feb23.mat')         # Load test.mat dataset into variable mat_test
 data_test = np.array(mat_test['test'])          # Create a numpy array from the data in mat_test
 X_test = data_test[:, 0: data_test.shape[1]-1]  # Assign all rows and all columns except the last one to X_test
 y_test = data_test[:, [-1]]                     # Assign the last column to y_test
@@ -207,7 +207,6 @@ def sgd(m, x_train, y_train, lr=0.0001, epochs=100):
         # Loop over the training data and target variables
         for x_i, y_i in zip(x_train, y_train):
             # Calculate gradient of the cost function
-            # grad = (-2*x_i.T) * (y_i - np.dot(x_i.T, beta_approx))                # MSE
             grad = (-y_i * x_i.T) / (1 + np.exp(y_i * np.dot(x_i.T, beta_approx)))  # Logistic loss
             beta_approx -= lr*grad  # Update beta approximation using the calculated gradient
             # Store the final values of beta in beta_dict after the last iteration
@@ -215,7 +214,6 @@ def sgd(m, x_train, y_train, lr=0.0001, epochs=100):
                 beta_dict[j] = beta_approx
                 j += 1
         # Calculate the loss after each iteration
-        # loss = np.mean((y_train - np.dot(x_train, beta_approx))**2)               # MSE
         loss = np.mean(np.log(1 + np.exp(-y_train * np.dot(x_train, beta_approx)))) # Logistic loss
         loss_history.append(loss)
     # Return the final values of beta stored in beta_dict and the loss history
@@ -244,7 +242,7 @@ def try_lr(lr_array, epochs):
 
 
 lr = 0.001  # best lr for MSE is 0.00001 and for logistic loss is 0.001
-epochs = 100
+epochs = 50
 
 # try_lr([0.000001, 0.00001, 0.0001, 0.001, 0.01, 0.1], epochs)
 
